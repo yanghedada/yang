@@ -26,18 +26,19 @@ fc_size = 512
 
 batch_size = 128
 
-learning_rate_base = 0.8
-regulariztion_rate = 0.001
+learning_rate_base = 0.01
+regulariztion_rate = 0.0001
 learing_rate_decay = 0.99
 training_steps = 5000
 moving_average_decay = 0.99
 
 def get_weight_l2(shape ,name, regulariztion_rate=None):
     weight = tf.get_variable('weight_%s'%str(name), shape=shape, initializer=tf.truncated_normal_initializer(stddev=0.1) )
-    bias =  tf.get_variable('bias_%s'%str(name), shape=[shape[-1]], initializer=tf.truncated_normal_initializer(stddev=0.1) )
+    bias =  tf.get_variable('bias_%s'%str(name), shape=[shape[-1]], initializer=tf.constant_initializer(0.1) )
     if regulariztion_rate != None  :
         tf.add_to_collection('loss' ,tf.contrib.layers.l2_regularizer(regulariztion_rate)(weight))
     return bias , weight
+
 
 def inference(input_tensor, train, regulariztion_rate):
     with tf.variable_scope('layer1_conv1'):
@@ -103,7 +104,7 @@ def train(mnist):
     with tf.control_dependencies([train_step , variables_averages_op]):
         train_op = tf.no_op(name='train')
         
-    correct_prediction = tf.equal(tf.arg_max(y , 1) ,tf.argmax(y_ , 1))
+    correct_prediction = tf.equal(tf.argmax(y , 1) ,tf.argmax(y_ , 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction , tf.float32))
     
     
@@ -115,13 +116,13 @@ def train(mnist):
         test_feed = {x:np.reshape(mnist.test.images[:200],(-1 ,image_size, image_size, num_channels)) , y_:mnist.test.labels[:200]}
         every_tranin = int(mnist.train.num_examples / batch_size ) 
         for i in range(training_steps):
-            for j in range(every_tranin):
-                bx , by = mnist.train.next_batch(batch_size)
-            _ , loss , step = sess.run([train_op , regularizer_loss , global_step] , feed_dict={x:np.reshape(bx,(-1 ,image_size, image_size, num_channels)) , y_:by})
+            #for j in range(every_tranin):
+            bx , by = mnist.train.next_batch(batch_size)
+            _ ,  step = sess.run([train_op  , global_step] , feed_dict={x:np.reshape(bx,(-1 ,image_size, image_size, num_channels)) , y_:by})
             if i % 2 == 0 :
                 validate_acc = sess.run(accuracy , feed_dict=validate_feed)
                 print("After %d training step(s), global_step is (%s) ,validation accuracy using average model is %g " % (i, step, validate_acc))
-                saver.save(sess , 'saver/moedl1.ckpt',global_step=global_step)
+                #saver.save(sess , 'saver/moedl1.ckpt',global_step=global_step)
         test_acc=sess.run(accuracy,feed_dict=test_feed)
         print(("After %d training step(s), test accuracy using average model is %g" %(training_steps, test_acc)))
         

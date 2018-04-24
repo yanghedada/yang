@@ -74,7 +74,7 @@ def train(mnist):
     with tf.control_dependencies([train_step , variables_averages_op]):
         train_op = tf.no_op(name='train')
         
-    correct_prediction = tf.equal(tf.arg_max(y , 1) ,tf.argmax(y_ , 1))
+    correct_prediction = tf.equal(tf.argmax(y , 1) ,tf.argmax(y_ , 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction , tf.float32))
     
     
@@ -88,7 +88,7 @@ def train(mnist):
         for i in range(training_steps):
             for j in range(every_tranin):
                 bx , by = mnist.train.next_batch(batch_size)
-            _ , loss , step = sess.run([train_op , regularizer_loss , global_step] , feed_dict={x:bx , y_:by})
+                _ , step = sess.run([train_op ,  global_step] , feed_dict={x:bx , y_:by})
             if i % 2 == 0 :
                 validate_acc = sess.run(accuracy , feed_dict=validate_feed)
                 print("After %d training step(s), global_step is (%s) ,validation accuracy using average model is %g " % (i, step, validate_acc))
@@ -103,7 +103,7 @@ def evaluate(mnist):
     validate_feed  = {x : mnist.validation.images[:200],y_:mnist.validation.labels[:200]}
     y = inference(x ,None )
     
-    correct_prediction = tf.equal(tf.arg_max(y , 1) ,tf.argmax(y_ , 1))
+    correct_prediction = tf.equal(tf.argmax(y , 1) ,tf.argmax(y_ , 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction , tf.float32))
     
     variable_averages = tf.train.ExponentialMovingAverage(moving_average_decay)
