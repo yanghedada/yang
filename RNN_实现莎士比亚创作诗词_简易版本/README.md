@@ -17,13 +17,21 @@ After 25 , validation accuracy is [0.765625]
 After 30 training step(s), test accuracy using average model is 0.85
 
 Write the beginning of your poem, the Shakespeare machine will complete it. Your input is: i love you too much.
+
 i love you too much.
+
 so i abraud.
+
 no mattern what one poor stipod can nature's halp your own comes for nof mine eye every poos better than belf lovenes to lead,
+
 to ember than newe
+
 that that know sin,
+
 that feeds of veverick knowist gonds it for your in them steal nof so bitt!
+
 bonk, klick,  
+
 in mend the oteor in the wrong, him tongue from your self did friendse.
 
 
