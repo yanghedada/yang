@@ -7,18 +7,17 @@ Created on Sat Apr 28 16:40:04 2018
 import tensorflow as tf
 import numpy as np
 import io
-import sys
-from sklearn.cross_validation import train_test_split
-from sklearn.model_selection import KFold
+
 text = io.open('shakespeare.txt', encoding='utf-8').read().lower()
+
 chars = sorted(list(set(text)))
 learning_rate = 0.01
-training_steps = 10000
+training_steps = 30
 batch_size = 64
 display_step = 10
 n_steps = 38
 n_input = 38
-n_hidden = 128
+n_hidden = 256
 n_classes = 38
 # 构建数据集 
 #  X:[len(text)-n_steps，n_steps]
@@ -102,19 +101,20 @@ def train():
         tf.global_variables_initializer().run()
         mini_batches = random_mini_batches(X_, Y_, mini_bath_size=batch_size) 
         for i in range(training_steps):
-            for x_train,y_train in mini_batches[:-1]:
+            for x_train,y_train in mini_batches:
                 _ = sess.run(train_op, feed_dict={x:x_train , y:y_train })
-            #if i % 2 == 0 :
-                validate_acc = sess.run([accuracy], feed_dict={x:mini_batches[-1][0] , y:mini_batches[-1][1]})
+            if i % 5 == 0 :
+                j = np.random.randint(len(mini_batches[0]))
+                validate_acc = sess.run([accuracy], feed_dict={x:mini_batches[j][0] , y:mini_batches[j][1]})
                 print("After %d , validation accuracy is %s " % (i,  validate_acc))
         test_acc=sess.run(accuracy,feed_dict={x:mini_batches[-1][0] , y:mini_batches[-1][1]})
         print(("After %d training step(s), test accuracy using average model is %.2f" %(training_steps, test_acc)))    
         saver.save(sess , 'saver/moedl1.ckpt')
     
 def generate_output():
-    with tf.variable_scope('Bi_RNN') as scope:
-        scope.reuse_variables()
-        y_ = BiRNN(x)
+    #with tf.variable_scope('Bi_RNN') as scope:
+    #scope.reuse_variables()
+    y_ = BiRNN(x)
     saver = tf.train.Saver()
     with tf.Session() as sess:
         saver.restore(sess,'saver/moedl1.ckpt')
@@ -138,6 +138,7 @@ def generate_output():
             if next_char == '\n':
                 continue
         print(generated)
+        
 char_indices = dict((c, i) for i, c in enumerate(chars))
 indices_char = dict((i, c) for i, c in enumerate(chars))
 X, Y = build_data(text, n_steps, stride = 3)
