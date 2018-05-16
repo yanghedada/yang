@@ -53,6 +53,12 @@ def decoder(x, layer_dimension):
     decoder_layer = encoder(x, layer_dimension)
     return decoder_layer
 
+def dnn(x, layer_dimension):
+    dnn_out = encoder(x, layer_dimension)
+    weight, bias = get_weight([layer_dimension[-1], 13], 0.3)
+    dnn_out = tf.nn.softmax(tf.matmul(dnn_out, weight) + bias)
+    return dnn_out
+    
 def train(epoch,layer_dimension):
     print('train....')
     x = tf.placeholder(tf.float32, shape=(None, input_layer))
@@ -60,8 +66,7 @@ def train(epoch,layer_dimension):
     
     encoder_x = encoder(x, layer_dimension)
     dencoder_x =  decoder(encoder_x, layer_dimension[::-1])
-    weight, bias = get_weight([layer_dimension[-1], 13], 0.3)
-    y_ = tf.nn.softmax(tf.matmul(encoder_x, weight) + bias)
+    y_ = dnn(encoder_x, [64, 128, 128, 13])
     cost_mes = tf.reduce_mean(tf.pow(x - dencoder_x, 2))
     cross_entropy = -tf.reduce_sum(y * tf.log1p(y_))
     cost_mes_optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.1).minimize(cost_mes)  
@@ -101,7 +106,7 @@ def train(epoch,layer_dimension):
                 
 input_layer = 520
 out_layer = 13
-layer_dimension = [input_layer,256, 100]
+layer_dimension = [input_layer,256, 64]
 batch_size = 10
 epoch = 10
 
