@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 """
+Created on Wed Sep 26 08:43:37 2018
+
+@author: yanghe
+"""
+
+# -*- coding: utf-8 -*-
+"""
 Created on Sat Apr 28 20:39:38 2018
 
 @author: yanghe
@@ -25,9 +32,10 @@ size = 50
 n_hidden = 128
 batch_size = 4
 vocab_size = 400000
-max_epoch  = 1000
+max_epoch  = 10
 learning_rate = 0.01
 n_classes = 5
+count = 0
 
 input_data = tf.placeholder(tf.int32, [None, num_steps])
 targets = tf.placeholder(tf.int32, [None, n_classes])
@@ -82,21 +90,25 @@ def train():
                                                         keep_prob:1.0})
             print("After %d , validation accuracy is %s " % (i,accuracy_))
         saver.save(sess , 'saver/moedl_em.ckpt')
-        
-def predict():
+
     
+def predict():
+    global count
     on_training = False
     with tf.variable_scope("pred") as scope:
-        scope.reuse_variables()
+        if count == 0:
+            pass
+        else:
+            scope.reuse_variables()
         pred = model(input_data,on_training)
+        count += 1
     saver = tf.train.Saver()
     with tf.Session() as sess:
         tf.global_variables_initializer().run()
-        saver.restore(sess,'saver/moedl_em.ckpt')
+        saver.restore(sess,'./saver/moedl_em.ckpt')
         usr_input = input("Write the beginning of your want to say , but not benyond 10 words :")
-        usr_input = 'happy'
         X_test = sentences_to_indices(np.array([usr_input]), word_to_index, 10)
-        predict_= sess.run(pred,feed_dict={input_data:X_test_indices,keep_prob:1.0})
+        predict_= sess.run(pred,feed_dict={input_data:X_test,keep_prob:1.0})
         print('you input is ',usr_input,'machine predict you want tp say:--->',label_to_emoji(np.argmax(predict_)))
         
 #train()
